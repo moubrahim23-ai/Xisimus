@@ -1,1 +1,1 @@
-tree "\\Ufl1-a03\eids-eaa-pdf-statiques\ACCESSIBILITE\CONTRATHEQUE" /F /A > "%USERPROFILE%\Desktop\CONTRATHEQUE.txt"
+pushd "\\Ufl1-a03\eids-eaa-pdf-statiques\ACCESSIBILITE\CONTRATHEQUE" && tree /F /A > "%USERPROFILE%\Desktop\CONTRATHEQUE.txt" & popd
