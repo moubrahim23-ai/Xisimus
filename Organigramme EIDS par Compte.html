@@ -1,0 +1,146 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Organigramme EIDS par Compte</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: organigramme descendant. EIDS > responsables d'activité > comptes > encadrement (postes à remplir) > activités > sous-activités et superviseurs. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#1b2433; --muted:#5d6878; --line:#b9c1cf;
+  --root:#1b2433; --root-fg:#fff; --ra:#1f3a5f; --ra-fg:#fff; --accent:#c8501e;
+  --cmaf:#2f6b5e; --cofidis:#7a3f8f; --floa:#b4540a; --card:#eef1f6; --edge:#d5dbe6; --slot:#fafbfc;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141c; --surface:#171e29; --fg:#e6eaf1; --muted:#94a0b2; --line:#3b4658;
+  --root:#e6eaf1; --root-fg:#0f141c; --ra:#3d6aa6; --ra-fg:#fff; --accent:#f0804d;
+  --cmaf:#3f9a85; --cofidis:#a56bbb; --floa:#e08a3f; --card:#1f2937; --edge:#2c3646; --slot:#121923; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141c; --surface:#171e29; --fg:#e6eaf1; --muted:#94a0b2; --line:#3b4658;
+  --root:#e6eaf1; --root-fg:#0f141c; --ra:#3d6aa6; --ra-fg:#fff; --accent:#f0804d;
+  --cmaf:#3f9a85; --cofidis:#a56bbb; --floa:#e08a3f; --card:#1f2937; --edge:#2c3646; --slot:#121923; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.4;
+  padding-block:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:22px;font-weight:600;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:500;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ra);color:var(--ra-fg);border-color:var(--ra)}
+.tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chart{overflow-x:auto;padding:20px 12px 28px;background:var(--surface);border:1px solid var(--edge);border-radius:8px}
+.tree{display:flex;flex-direction:column;align-items:center;min-width:max-content;margin:0 auto}
+.node{padding:10px 22px;border-radius:6px;text-align:center;font-weight:600}
+.node small{display:block;font-weight:400;font-size:12px;opacity:.85}
+.root{background:var(--root);color:var(--root-fg);font-size:17px;letter-spacing:.08em}
+.ra{background:var(--ra);color:var(--ra-fg);min-width:230px}
+.ra input{margin-top:6px}
+.stem{width:2px;height:22px;background:var(--line)}
+.row{display:flex;gap:28px;align-items:flex-start;padding:0;margin:0;list-style:none}
+.col{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:22px}
+.col::before{content:"";position:absolute;top:0;left:50%;width:2px;height:22px;background:var(--line)}
+.col::after{content:"";position:absolute;top:0;left:-14px;right:-14px;height:2px;background:var(--line)}
+.col:first-child::after{left:50%}
+.col:last-child::after{right:50%}
+.col:only-child::after{display:none}
+.col.in{padding-top:0}.col.in::before,.col.in::after{display:none}
+.acct{width:300px;display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.acct-h{border-radius:6px;padding:10px 14px;color:#fff;text-align:center;font-weight:600;letter-spacing:.04em}
+.acct-h small{display:block;font-weight:400;font-size:12px;opacity:.92;font-family:var(--f-mono)}
+.box{background:var(--card);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.box h3{margin:0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.role{display:flex;flex-direction:column;gap:4px}
+.role>b{font-size:12.5px;font-weight:500;display:flex;justify-content:space-between;gap:8px}
+.role>b em{font-style:normal;font-family:var(--f-mono);color:var(--muted);font-size:12px}
+input{font:inherit;font-size:12.5px;width:100%;box-sizing:border-box;padding:5px 8px;border:1px solid var(--edge);border-radius:4px;background:var(--slot);color:var(--fg)}
+.ra input{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4);color:var(--ra-fg)}
+.ra input::placeholder{color:rgba(255,255,255,.7)}
+input::placeholder{color:var(--muted)}
+.todo{font-size:11.5px;color:var(--accent)}
+.act{background:var(--surface);border:1px solid var(--edge);border-radius:6px;overflow:hidden}
+.act>header{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;font-weight:600;font-size:13px;border-bottom:1px solid var(--edge);background:var(--card)}
+.act>header span:last-child{font-family:var(--f-mono);font-weight:500;font-size:12px;white-space:nowrap}
+.act ul{list-style:none;margin:0;padding:6px 10px;display:flex;flex-direction:column;gap:3px}
+.act li{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
+.act li span:last-child{font-family:var(--f-mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.sups{border-top:1px dashed var(--accent);padding:6px 10px 8px;display:flex;flex-direction:column;gap:4px}
+.sups h4{margin:0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.sups div{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
+.sups .t{min-width:0;overflow-wrap:anywhere}
+.sups .c{font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.sups .x{display:block;font-size:11px;color:var(--muted)}
+.note{color:var(--muted);font-size:12px;margin-top:12px}
+</style>
+<div class="top">
+  <div><h1>Organigramme EIDS par compte</h1><p class="sub" id="sub"></p></div>
+  <div class="tabs" role="tablist" id="tabs"></div>
+</div>
+<div class="chart"><div class="tree" id="tree"></div></div>
+<p class="note">Les noms saisis restent sur votre navigateur. Effectifs : agents du référentiel hors superviseurs. Les superviseurs sont placés dans l'activité de leur équipe. Les postes COFIDIS et FLOA (managers, backups, formateur, gestionnaire de flux, qualiticien) attendent leurs effectifs.</p>
+<script>
+const ACC={"CMAF": {"AFEDIM": {"subs": {"AFEDIM AGIMO": {"TUNIS": 17}, "AFEDIM GESTION": {"TUNIS": 36}, "AFEDIM TRANSACTION": {"RABAT": 6}}, "sups": [{"name": "Fouad HMIDOUCH", "site": "RABAT", "n": 6, "all": ["AFEDIM", "FACTO", "SORTANT"]}, {"name": "Med Wajdi DGHAEIS", "site": "TUNIS", "n": 26, "all": ["AFEDIM"]}, {"name": "Amira TRAD", "site": "TUNIS", "n": 9, "all": ["AFEDIM", "COFIDIS"]}]}, "CML": {"subs": {"CM LEASING": {"RABAT": 14}}, "sups": []}, "FACTO": {"subs": {"FACTO": {"RABAT": 4}}, "sups": [{"name": "Fouad HMIDOUCH", "site": "RABAT", "n": 4, "all": ["AFEDIM", "FACTO", "SORTANT"]}]}, "GLF": {"subs": {"Groupe la Française": {"RABAT": 14}}, "sups": [{"name": "Fatima Zahra EL KAOUTAR", "site": "RABAT", "n": 14, "all": ["GLF"]}]}, "LEADS GOOGLE": {"subs": {"LEADS GOOGLE": {"RABAT": 42, "TUNIS": 23}}, "sups": [{"name": "Nour-El Houda OUAQERROUCH", "site": "RABAT", "n": 19, "all": ["LEADS GOOGLE"]}, {"name": "Amel DKHILI", "site": "TUNIS", "n": 15, "all": ["COFIDIS", "LEADS GOOGLE", "SORTANT"]}, {"name": "Ibrahim MAROUANI", "site": "TUNIS", "n": 8, "all": ["LEADS GOOGLE"]}]}, "MONABANQ": {"subs": {"MONABANQ": {"TUNIS": 39}}, "sups": [{"name": "Tarek GHARBI", "site": "TUNIS", "n": 16, "all": ["MONABANQ"]}, {"name": "Elyes ZIEDI", "site": "TUNIS", "n": 22, "all": ["MONABANQ"]}]}, "PRESSE": {"subs": {"La Presse": {"RABAT": 40, "TUNIS": 20}}, "sups": [{"name": "Mohamed Arbi ECHI", "site": "TUNIS", "n": 8, "all": ["COFIDIS", "PRESSE", "SORTANT"]}]}, "SORTANT": {"subs": {"ENTRANT SORTANT": {"TUNIS": 2}, "SORTANT CM-CIC": {"RABAT": 4, "TUNIS": 85}, "SORTANT TLVT": {"RABAT": 4}, "Sortant": {"RABAT": 1}}, "sups": [{"name": "Ussama EL JAOUHAR", "site": "RABAT", "n": 5, "all": ["SORTANT"]}, {"name": "Fouad HMIDOUCH", "site": "RABAT", "n": 3, "all": ["AFEDIM", "FACTO", "SORTANT"]}, {"name": "Nadia BERJEB", "site": "TUNIS", "n": 4, "all": ["COFIDIS", "SORTANT"]}, {"name": "Sameh BOURKHIS", "site": "TUNIS", "n": 13, "all": ["COFIDIS", "SORTANT"]}, {"name": "Amel DKHILI", "site": "TUNIS", "n": 8, "all": ["COFIDIS", "LEADS GOOGLE", "SORTANT"]}, {"name": "Mohamed Arbi ECHI", "site": "TUNIS", "n": 9, "all": ["COFIDIS", "PRESSE", "SORTANT"]}, {"name": "Majdi ISSAMI", "site": "TUNIS", "n": 1, "all": ["FLOA", "SORTANT"]}, {"name": "Alaeddine JOUINI AHMED", "site": "TUNIS", "n": 24, "all": ["SORTANT"]}, {"name": "Mohamed NACCACH", "site": "TUNIS", "n": 0, "all": ["SORTANT"]}]}}, "COFIDIS": {"COFIDIS": {"subs": {"COFIDIS DCL DRC DPA": {"RABAT": 39, "TUNIS": 78}, "COFIDIS DFRA": {"RABAT": 12, "TUNIS": 45}, "COFIDIS Espagne": {"RABAT": 12, "TUNIS": 34}, "COFIDIS Italie": {"RABAT": 9}, "COFIDIS LDD GI": {"TUNIS": 16}, "COFIDIS RIB": {"TUNIS": 10}, "COFIDIS VOA": {"TUNIS": 3}, "CREATIS": {"RABAT": 7}}, "sups": [{"name": "Meriem BEL-MALEM", "site": "RABAT", "n": 13, "all": ["COFIDIS"]}, {"name": "El Mehdi BELQASMI", "site": "RABAT", "n": 12, "all": ["COFIDIS"]}, {"name": "Walid BOUABID", "site": "RABAT", "n": 0, "all": ["COFIDIS"]}, {"name": "Papa Alassane FALL", "site": "RABAT", "n": 14, "all": ["COFIDIS"]}, {"name": "Marouane HARMOUCH", "site": "RABAT", "n": 24, "all": ["COFIDIS"]}, {"name": "Hanene ABDOULI", "site": "TUNIS", "n": 0, "all": ["COFIDIS"]}, {"name": "Nadia BERJEB", "site": "TUNIS", "n": 1, "all": ["COFIDIS", "SORTANT"]}, {"name": "Sameh BOURKHIS", "site": "TUNIS", "n": 1, "all": ["COFIDIS", "SORTANT"]}, {"name": "Hichem BOUSSAADA", "site": "TUNIS", "n": 3, "all": ["COFIDIS"]}, {"name": "Brahim CHALGHOUMI", "site": "TUNIS", "n": 5, "all": ["COFIDIS"]}, {"name": "Amel DKHILI", "site": "TUNIS", "n": 1, "all": ["COFIDIS", "LEADS GOOGLE", "SORTANT"]}, {"name": "Mohamed Arbi ECHI", "site": "TUNIS", "n": 2, "all": ["COFIDIS", "PRESSE", "SORTANT"]}, {"name": "Ahmed FERHI", "site": "TUNIS", "n": 3, "all": ["COFIDIS"]}, {"name": "Med Afif FERTANI", "site": "TUNIS", "n": 38, "all": ["COFIDIS"]}, {"name": "Ali GUIZANI", "site": "TUNIS", "n": 17, "all": ["COFIDIS"]}, {"name": "Mohamed HABIBI", "site": "TUNIS", "n": 0, "all": ["COFIDIS"]}, {"name": "Aziza HAJRI", "site": "TUNIS", "n": 23, "all": ["COFIDIS"]}, {"name": "Mohamed Salah KAFI", "site": "TUNIS", "n": 3, "all": ["COFIDIS"]}, {"name": "Noussaiba KHEDIMI", "site": "TUNIS", "n": 14, "all": ["COFIDIS"]}, {"name": "Haykel LAMIRI", "site": "TUNIS", "n": 2, "all": ["COFIDIS"]}, {"name": "Fares LOUATI", "site": "TUNIS", "n": 0, "all": ["COFIDIS"]}, {"name": "Ghassen MARZOUKI", "site": "TUNIS", "n": 12, "all": ["COFIDIS"]}, {"name": "Refka MEDINI", "site": "TUNIS", "n": 4, "all": ["COFIDIS"]}, {"name": "Ahmed REZGUI", "site": "TUNIS", "n": 13, "all": ["COFIDIS"]}, {"name": "Amira TRAD", "site": "TUNIS", "n": 2, "all": ["AFEDIM", "COFIDIS"]}, {"name": "Jihene ZEMZEMI", "site": "TUNIS", "n": 7, "all": ["COFIDIS"]}]}}, "FLOA": {"FLOA": {"subs": {"APSO": {"TUNIS": 2}, "Assistant Production": {"RABAT": 2, "TUNIS": 3}, "B2B": {"TUNIS": 3}, "BU Assurance": {"TUNIS": 11}, "Back Office": {"RABAT": 12, "TUNIS": 30}, "Digital": {"TUNIS": 19}, "Digital ChayAll": {"RABAT": 5}, "E-Réputation": {"TUNIS": 6}, "FLOA OCTROI": {"TUNIS": 5}, "Gestion spécifique": {"RABAT": 10}, "N2": {"RABAT": 11, "TUNIS": 25}, "Octroi": {"RABAT": 11, "TUNIS": 26}, "RC Tél": {"RABAT": 12, "TUNIS": 20}, "Reclamation": {"TUNIS": 17}, "Recouvrement": {"TUNIS": 23}, "Retention": {"TUNIS": 11}, "Triennale": {"TUNIS": 7}}, "sups": [{"name": "Zineb BALBAL", "site": "RABAT", "n": 5, "all": ["FLOA"]}, {"name": "Abdellah BOUAICHE", "site": "RABAT", "n": 4, "all": ["FLOA"]}, {"name": "Mohamed EL BRINSI", "site": "RABAT", "n": 5, "all": ["FLOA"]}, {"name": "Badreddine EL HARRATI", "site": "RABAT", "n": 4, "all": ["FLOA"]}, {"name": "Idriss IDRISSI CHLIHI", "site": "RABAT", "n": 7, "all": ["FLOA"]}, {"name": "Sara JAWAB", "site": "RABAT", "n": 7, "all": ["FLOA"]}, {"name": "Fatima-Zahra RAHMOUNI", "site": "RABAT", "n": 12, "all": ["FLOA"]}, {"name": "Kaoutar ROUMANE", "site": "RABAT", "n": 11, "all": ["FLOA"]}, {"name": "Houssem Eddine AMIRI", "site": "TUNIS", "n": 15, "all": ["FLOA"]}, {"name": "Wissal ARFAOUI", "site": "TUNIS", "n": 8, "all": ["FLOA"]}, {"name": "Myriam AYACHI", "site": "TUNIS", "n": 14, "all": ["FLOA"]}, {"name": "Sana BARHOUMI", "site": "TUNIS", "n": 12, "all": ["FLOA"]}, {"name": "Karim BEN BAHRIA", "site": "TUNIS", "n": 12, "all": ["FLOA"]}, {"name": "Saida GUEBSI", "site": "TUNIS", "n": 8, "all": ["FLOA"]}, {"name": "Mehdi HAMMAMI", "site": "TUNIS", "n": 20, "all": ["FLOA"]}, {"name": "Mariem HIDRI", "site": "TUNIS", "n": 11, "all": ["FLOA"]}, {"name": "Majdi ISSAMI", "site": "TUNIS", "n": 9, "all": ["FLOA", "SORTANT"]}, {"name": "Nizar JAZZAR", "site": "TUNIS", "n": 11, "all": ["FLOA"]}, {"name": "Achref Bady JERBI", "site": "TUNIS", "n": 8, "all": ["FLOA"]}, {"name": "Asma KHOUILDI", "site": "TUNIS", "n": 23, "all": ["FLOA"]}, {"name": "Hichem RAHMANI", "site": "TUNIS", "n": 11, "all": ["FLOA"]}, {"name": "Ahmed SANDID", "site": "TUNIS", "n": 11, "all": ["FLOA"]}, {"name": "Wassim SIFAOUI", "site": "TUNIS", "n": 8, "all": ["FLOA"]}, {"name": "Farouk SLIMI", "site": "TUNIS", "n": 15, "all": ["FLOA"]}, {"name": "Hayfa TRABELSI", "site": "TUNIS", "n": 9, "all": ["FLOA"]}]}}};
+const SITES=['TOUS','RABAT','TUNIS'];
+let site='TOUS';
+try{site=localStorage.getItem('eids-site')||site}catch(e){}
+if(!SITES.includes(site))site='TOUS';
+const ROLES={
+ CMAF:[['Assistant de production',1],['Manager',6],['Backup',4],['Formateur',1],['Gestionnaire de flux',1],['Qualiticien',1]],
+ COFIDIS:[['Assistant de production',1],['Manager',null],['Backup',null],['Formateur',null],['Gestionnaire de flux',null],['Qualiticien',null]],
+ FLOA:[['Assistant de production',2],['Manager',null],['Backup',null],['Formateur',null],['Gestionnaire de flux',null],['Qualiticien',null]]};
+const COLOR={CMAF:'--cmaf',COFIDIS:'--cofidis',FLOA:'--floa'};
+const LABEL={CMAF:'Crédit Mutuel Alliance Fédérale',COFIDIS:'COFIDIS',FLOA:'FLOA'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pick=o=>site==='TOUS'?Object.values(o).reduce((a,v)=>a+v,0):(o[site]||0);
+const store={};try{Object.assign(store,JSON.parse(localStorage.getItem('eids-names')||'{}'))}catch(e){}
+function save(){try{localStorage.setItem('eids-names',JSON.stringify(store))}catch(e){}}
+function slot(key,ph){return `<input type="text" data-k="${esc(key)}" placeholder="${esc(ph)}" value="${esc(store[key]||'')}" aria-label="${esc(ph)}">`}
+function acctStats(c){
+  let ag=0;const sn=new Set();
+  for(const a of Object.values(ACC[c])){
+    for(const s of Object.values(a.subs))ag+=pick(s);
+    for(const p of a.sups)if(site==='TOUS'||p.site===site)sn.add(p.name);
+  }
+  return {ag,sup:sn.size};
+}
+function roleHtml(c){
+  return ROLES[c].map(([r,n])=>{
+    const cnt=n||1;
+    const slots=Array.from({length:cnt},(_,i)=>slot(`${c}|${r}|${i}`,n&&n>1?`${r} ${i+1}`:r)).join('');
+    return `<div class="role"><b>${r}<em>${n?'×'+n:'à confirmer'}</em></b>${slots}${n?'':'<span class="todo">Effectif à renseigner</span>'}</div>`}).join('');
+}
+function actHtml(c){
+  return Object.entries(ACC[c]).map(([a,d])=>{
+    const subs=Object.entries(d.subs).map(([k,v])=>[k,pick(v)]).filter(x=>x[1]>0).sort((x,y)=>y[1]-x[1]);
+    const sups=d.sups.filter(p=>site==='TOUS'||p.site===site);
+    const tot=subs.reduce((t,x)=>t+x[1],0);
+    if(!subs.length&&!sups.length)return '';
+    return {a,tot,html:`<div class="act"><header><span>${esc(a)}</span><span>${tot} ag.</span></header>
+      ${subs.length?'<ul>'+subs.map(([k,n])=>`<li><span>${esc(k)}</span><span>${n}</span></li>`).join('')+'</ul>':''}
+      ${sups.length?`<div class="sups"><h4>Superviseurs (${sups.length})</h4>`+sups.sort((x,y)=>y.n-x.n).map(p=>{
+        const o=p.all.filter(x=>x!==a);
+        const note=[site==='TOUS'?p.site:'',p.n===0?'sans équipe rattachée':(o.length?'gère aussi '+o.join(', '):'')].filter(Boolean).join(' · ');
+        return `<div><span class="t">${esc(p.name)}${note?`<span class="x">${esc(note)}</span>`:''}</span><span class="c">${p.n} ag.</span></div>`}).join('')+'</div>':''}
+      </div>`};
+  }).filter(Boolean).sort((x,y)=>y.tot-x.tot).map(x=>x.html).join('');
+}
+function acct(c){
+  const st=acctStats(c);
+  return `<div class="acct"><div class="acct-h" style="background:var(${COLOR[c]})">${LABEL[c]}<small>${st.ag} agents · ${st.sup} superviseurs</small></div>
+  <div class="box"><h3>Encadrement</h3>${roleHtml(c)}</div>${actHtml(c)}</div>`;
+}
+function render(){
+  document.getElementById('tabs').innerHTML=SITES.map(s=>`<button class="tab" role="tab" aria-selected="${s===site}" data-s="${s}">${s==='TOUS'?'Tous les sites':s[0]+s.slice(1).toLowerCase()}</button>`).join('');
+  const all=['CMAF','COFIDIS','FLOA'].map(acctStats);
+  document.getElementById('sub').textContent=all.reduce((t,x)=>t+x.ag,0)+' agents · '+all.reduce((t,x)=>t+x.sup,0)+' superviseurs · 3 comptes';
+  document.getElementById('tree').innerHTML=`<div class="node root">EIDS<small>Comptes gérés</small></div><div class="stem"></div>
+  <ul class="row">
+    <li class="col"><div class="node ra">Responsable d'activité<small>FLOA</small>${slot('RA|FLOA|0','Nom du responsable')}</div><div class="stem"></div>
+      <ul class="row"><li class="col in">${acct('FLOA')}</li></ul></li>
+    <li class="col"><div class="node ra">Responsable d'activité<small>CMAF et COFIDIS</small>${slot('RA|CMAF-COFIDIS|0','Nom du responsable')}</div><div class="stem"></div>
+      <ul class="row"><li class="col">${acct('CMAF')}</li><li class="col">${acct('COFIDIS')}</li></ul></li>
+  </ul>`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;site=b.dataset.s;try{localStorage.setItem('eids-site',site)}catch(x){}render()});
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k){store[k]=e.target.value;save()}});
+render();
+</script>
+</body></html>
