@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Audit PDF Accessibilité — Couleurs</title>
+<style>
+:root{--bg:#f3f5f8;--panel:#fff;--ink:#172033;--muted:#667085;--line:#e3e7ee;--blue:#2457c5;--red:#b42318;--green:#067647;--amber:#b54708}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",Arial,sans-serif}
+header{background:#14233d;color:#fff;padding:22px 28px}header h1{margin:0;font-size:22px}header p{margin:5px 0 0;color:#cbd5e1}
+main{max-width:1450px;margin:22px auto;padding:0 18px}.toolbar,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px #17203308}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.grow{flex:1}.btn{border:0;border-radius:8px;padding:10px 14px;font-weight:600;cursor:pointer;background:var(--blue);color:#fff}.btn.secondary{background:#e9eefb;color:#193b83}.btn:disabled{opacity:.45;cursor:not-allowed}
+.drop{border:2px dashed #aab8d0;border-radius:10px;padding:22px;text-align:center;background:#f8faff;cursor:pointer}.drop.drag{border-color:var(--blue);background:#eef4ff}.drop strong{display:block;font-size:16px}
+.small{font-size:12px;color:var(--muted)}.status{margin-top:10px;color:var(--muted)}.notice{background:#fff8e8;border:1px solid #f4d7a1;color:#7a4b00;border-radius:9px;padding:11px 13px;margin:12px 0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;margin:14px 0}.stat{background:#f7f9fc;border:1px solid var(--line);border-radius:9px;padding:12px}.stat b{font-size:22px;display:block}
+.layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);gap:16px}.panel h2{font-size:17px;margin:0 0 12px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1px solid var(--line);padding:9px 7px;vertical-align:middle}th{font-size:12px;color:var(--muted);font-weight:700}
+.swatch{display:inline-block;width:23px;height:23px;border:1px solid #0002;border-radius:5px;vertical-align:middle;margin-right:7px}
+input,select{padding:8px;border:1px solid #cbd2df;border-radius:7px;background:#fff;color:var(--ink)}input[type=color]{padding:2px;width:42px;height:34px}
+.pill{display:inline-block;border-radius:99px;padding:3px 8px;font-size:11px;font-weight:700}.ok{background:#e7f6ed;color:var(--green)}.warn{background:#fff0df;color:var(--amber)}.bad{background:#feeceb;color:var(--red)}.muted{color:var(--muted)}
+#viewer{width:100%;height:680px;border:1px solid var(--line);border-radius:8px;background:#eef1f5}
+.empty{text-align:center;color:var(--muted);padding:30px 10px}.footer{color:var(--muted);font-size:12px;padding:10px 2px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}#viewer{height:520px}}
+</style>
+</head>
+<body>
+<header><h1>Audit PDF Accessibilité</h1><p>Module 01 · Analyse des couleurs et préparation du contrôle de contraste</p></header>
+<main>
+<section class="toolbar">
+ <div class="drop" id="drop"><strong>Déposez votre PDF ici</strong><span class="small">ou sélectionnez un fichier depuis votre ordinateur</span><div style="margin-top:12px"><button class="btn" id="pick">Choisir un PDF</button><input id="file" type="file" accept="application/pdf,.pdf" hidden></div></div>
+ <div class="row" style="margin-top:12px"><div class="grow"><b id="filename">Aucun document chargé</b><div class="small" id="fileinfo">Les fichiers sont traités localement dans le navigateur.</div></div><button class="btn secondary" id="analyze" disabled>Analyser les couleurs</button><button class="btn secondary" id="clear" disabled>Réinitialiser</button></div>
+ <div class="status" id="status" role="status">En attente d'un PDF.</div>
+ <div class="notice"><b>Limite de cette première version :</b> l'analyseur lit les opérateurs de couleur présents dans les flux PDF accessibles. Les flux compressés sont décompressés si le navigateur prend en charge DecompressionStream. Les objets compressés, couleurs ICC/DeviceN, transparences complexes et associations exactes texte/fond peuvent ne pas être interprétés. Un résultat « aucun problème détecté » ne constitue donc pas une certification PDF/UA ou WCAG.</div>
+</section>
+<div class="stats">
+ <div class="stat"><span class="small">Pages déclarées</span><b id="pages">—</b></div>
+ <div class="stat"><span class="small">Couleurs détectées</span><b id="colors">—</b></div>
+ <div class="stat"><span class="small">Opérateurs texte repérés</span><b id="texts">—</b></div>
+ <div class="stat"><span class="small">Flux analysés</span><b id="streams">—</b></div>
+</div>
+<div class="layout">
+ <section class="panel"><h2>Inventaire des couleurs</h2><div class="row" style="margin-bottom:10px"><input id="filter" placeholder="Filtrer : #RRGGBB, RGB..." class="grow"><select id="kind"><option value="all">Toutes les couleurs</option><option value="fill">Remplissage</option><option value="stroke">Contour</option></select></div>
+ <div style="overflow:auto"><table><thead><tr><th>Couleur</th><th>Mode</th><th>Valeur</th><th>Occurrences</th><th>Action</th></tr></thead><tbody id="colorRows"><tr><td colspan="5" class="empty">Chargez un PDF pour commencer.</td></tr></tbody></table></div>
+ <p class="small">Les occurrences correspondent aux opérateurs de couleur détectés dans les flux analysés, pas nécessairement au nombre de caractères visibles.</p></section>
+ <section class="panel"><h2>Aperçu du document</h2><div id="previewEmpty" class="empty">L'aperçu PDF apparaîtra ici après importation.</div><iframe id="viewer" title="Aperçu PDF" hidden></iframe></section>
+</div>
+<section class="panel"><h2>Contrôle de contraste WCAG</h2>
+ <div class="row"><label>Couleur du texte <input type="color" id="fg" value="#222222"></label><label>Couleur du fond <input type="color" id="bgc" value="#ffffff"></label><button class="btn" id="calc">Calculer le contraste</button><div class="grow"></div><div><span class="small">Ratio</span><b id="ratio" style="font-size:24px;margin-left:10px">—</b></div></div>
+ <div id="contrastResult" class="status">Sélectionnez deux couleurs pour effectuer un calcul WCAG.</div>
+ <p class="small">Seuils WCAG 2.1 : 4,5:1 pour le texte courant ; 3:1 pour le grand texte (au moins 18 pt ou 14 pt gras). Les composants graphiques informatifs ont également des exigences spécifiques.</p>
+</section>
+<section class="panel"><h2>Remplacement de couleur — état du module</h2>
+ <p>Le remplacement direct dans un PDF doit préserver les flux, les longueurs d'objets et la table des références du fichier. Pour éviter de produire un PDF corrompu ou de supprimer son balisage d'accessibilité, cette fonction n'est pas activée dans cette première livraison.</p>
+ <p class="small">Étape suivante : moteur de réécriture PDF avec conservation des balises, polices, espaces colorimétriques et structure. Les couleurs extraites ici serviront de base à cette fonction.</p>
+</section>
+<div class="footer">Traitement local · Aucun envoi réseau · Prototype d'audit, non certifiant · Version 0.1</div>
+</main>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id);
+ let pdfFile=null, pdfUrl=null, inventory=[], rawText='';
+ const setStatus=t=>$('status').textContent=t;
+ $('pick').onclick=()=>$('file').click();
+ $('file').onchange=e=>{if(e.target.files[0]) loadFile(e.target.files[0]);};
+ $('drop').addEventListener('dragover',e=>{e.preventDefault();$('drop').classList.add('drag')});
+ $('drop').addEventListener('dragleave',()=>$('drop').classList.remove('drag'));
+ $('drop').addEventListener('drop',e=>{e.preventDefault();$('drop').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)loadFile(f)});
+ function loadFile(f){
+  if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf'){setStatus('Veuillez sélectionner un fichier PDF.');return;}
+  pdfFile=f; if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=URL.createObjectURL(f);
+  $('viewer').src=pdfUrl;$('viewer').hidden=false;$('previewEmpty').hidden=true;
+  $('filename').textContent=f.name;$('fileinfo').textContent=(f.size/1024/1024).toFixed(2)+' Mo · aperçu natif du navigateur';
+  $('analyze').disabled=false;$('clear').disabled=false;setStatus('PDF chargé. Lancez l’analyse des couleurs.');
+  $('pages').textContent='—';$('colors').textContent='—';$('texts').textContent='—';$('streams').textContent='—';
+  inventory=[];$('colorRows').innerHTML='<tr><td colspan="5" class="empty">Analyse en attente.</td></tr>';
+ }
+ $('clear').onclick=()=>{pdfFile=null;if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=null;$('viewer').removeAttribute('src');$('viewer').hidden=true;$('previewEmpty').hidden=false;$('filename').textContent='Aucun document chargé';$('fileinfo').textContent='Les fichiers sont traités localement dans le navigateur.';$('analyze').disabled=true;$('clear').disabled=true;setStatus('En attente d’un PDF.');};
+ const hex=n=>Math.max(0,Math.min(255,Math.round(n*255))).toString(16).padStart(2,'0').toUpperCase();
+ function addColor(map,mode,vals,raw){
+  const rgb=vals.map(v=>Math.max(0,Math.min(1,Number(v)||0)));
+  const h='#'+hex(rgb[0])+hex(rgb[1])+hex(rgb[2]);const key=mode+':'+h;
+  if(!map.has(key))map.set(key,{mode,hex:h,count:0,raw});
+  map.get(key).count++;
+ }
+ function parseOps(s,map,counters){
+  // Scanner lexical léger des opérateurs PDF de couleur. Il ne remplace pas un parseur PDF complet.
+  const tokens=s.match(/\/[A-Za-z0-9_.+-]+|[+-]?(?:\d+\.?\d*|\.\d+)|[A-Za-z*']+|#[0-9A-Fa-f]+|\[[^\]]*\]|\([^)]*(?:\\.[^)]*)*\)/g)||[];
+  let stack=[];
+  for(const t of tokens){
+   if(/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(t)){stack.push(t);continue;}
+   const op=t;
+   if(op==='rg'||op==='RG'){if(stack.length>=3)addColor(map,op==='rg'?'fill':'stroke',stack.slice(-3),stack.slice(-3).join(' ')+' '+op);stack=[];}
+   else if(op==='g'||op==='G'){if(stack.length)addColor(map,op==='g'?'fill':'stroke',[stack.at(-1),stack.at(-1),stack.at(-1)],stack.at(-1)+' '+op);stack=[];}
+   else if(op==='k'||op==='K'){if(stack.length>=4){let [c,m,y,k]=stack.slice(-4).map(Number);let r=1-Math.min(1,c*(1-k)+k),g=1-Math.min(1,m*(1-k)+k),b=1-Math.min(1,y*(1-k)+k);addColor(map,op==='k'?'fill':'stroke',[r,g,b],stack.slice(-4).join(' ')+' '+op);}stack=[];}
+   else if(['Tj','TJ',"'",'"'].includes(op)){counters.text++;stack=[];}
+   else if(['BT','ET','Tf','Td','TD','Tm','T*','Do','cm','q','Q','BI','ID','EI'].includes(op)){stack=[];}
+   else if(/^[A-Za-z*']+$/.test(op)){stack=[];}
+   else if(op.startsWith('/')){stack=[];}
+   else if(op.startsWith('(')||op.startsWith('[')||op.startsWith('#')){stack=[];}
+  }
+ }
+ async function maybeInflate(bytes){
+  if(typeof DecompressionStream==='undefined')return null;
+  try{const ds=new DecompressionStream('deflate');const stream=new Blob([bytes]).stream().pipeThrough(ds);return new Uint8Array(await new Response(stream).arrayBuffer());}catch(e){return null;}
+ }
+ async function analyze(){
+  if(!pdfFile)return;
+  $('analyze').disabled=true;setStatus('Lecture du fichier et analyse des flux PDF…');
+  try{
+   const bytes=new Uint8Array(await pdfFile.arrayBuffer());
+   const latin=()=>{let out='';const step=0x8000;for(let i=0;i<bytes.length;i+=step)out+=String.fromCharCode(...bytes.subarray(i,Math.min(i+step,bytes.length)));return out;};
+   const src=latin();rawText=src;
+   const pageCount=(src.match(/\/Type\s*\/Page\b/g)||[]).length;
+   const map=new Map(),counters={text:0,streams:0,compressed:0};
+   // Extract streams and attempt Flate decompression. Objects compressed in ObjStm are not expanded by this prototype.
+   let pos=0;
+   while((pos=src.indexOf('stream',pos))!==-1){
+    let start=pos+6;if(src[start]==='\r'&&src[start+1]==='\n')start+=2;else if(src[start]==='\n'||src[start]==='\r')start++;
+    let end=src.indexOf('endstream',start);if(end<0)break;
+    let raw=bytes.slice(start,end);while(raw.length&&[10,13].includes(raw[raw.length-1]))raw=raw.slice(0,-1);
+    const dictStart=src.lastIndexOf('<<',pos),dictEnd=src.indexOf('>>',dictStart);
+    const dict=dictStart>=0&&dictEnd>=0&&dictEnd<pos?src.slice(dictStart,dictEnd+2):'';
+    let content=null;
+    if(/\/FlateDecode/.test(dict)){content=await maybeInflate(raw);if(content)counters.compressed++;}
+    else content=raw;
+    if(content){let s='';for(let i=0;i<content.length;i+=0x8000)s+=String.fromCharCode(...content.subarray(i,Math.min(i+0x8000,content.length)));parseOps(s,map,counters);counters.streams++;}
+    pos=end+9;
+   }
+   inventory=[...map.values()].sort((a,b)=>b.count-a.count);
+   $('pages').textContent=pageCount||'Non déterminé';$('colors').textContent=inventory.length;$('texts').textContent=counters.text;$('streams').textContent=counters.streams;
+   renderRows();
+   setStatus(`Analyse terminée : ${counters.streams} flux lus, ${counters.compressed} flux compressés décompressés. ${src.includes('/ObjStm')?'Attention : des objets compressés n’ont pas été développés.':''}`);
+  }catch(err){console.error(err);setStatus('Erreur pendant l’analyse : '+err.message);}
+  finally{$('analyze').disabled=false;}
+ }
+ $('analyze').onclick=analyze;
+ function renderRows(){
+  const q=$('filter').value.toUpperCase(),kind=$('kind').value;
+  const rows=inventory.filter(x=>(kind==='all'||x.mode===kind)&&(x.hex.includes(q)||x.mode.toUpperCase().includes(q)));
+  $('colorRows').innerHTML=rows.length?rows.map((x,i)=>`<tr><td><span class="swatch" style="background:${x.hex}"></span>${x.hex}</td><td>${x.mode==='fill'?'Remplissage':'Contour'}</td><td><code>${x.raw}</code></td><td>${x.count}</td><td><button class="btn secondary" data-color="${x.hex}">Tester contraste</button></td></tr>`).join(''):'<tr><td colspan="5" class="empty">Aucune couleur correspondante détectée.</td></tr>';
+  $('colorRows').querySelectorAll('button[data-color]').forEach(b=>b.onclick=()=>{$('fg').value=b.dataset.color;$('calc').click();});
+ }
+ $('filter').oninput=renderRows;$('kind').onchange=renderRows;
+ function luminance(h){const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2));return .2126*c[0]+.7152*c[1]+.0722*c[2];}
+ $('calc').onclick=()=>{const a=luminance($('fg').value),b=luminance($('bgc').value),r=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);$('ratio').textContent=r.toFixed(2)+':1';const normal=r>=4.5,large=r>=3;$('contrastResult').innerHTML=`Texte courant : <span class="pill ${normal?'ok':'bad'}">${normal?'Conforme':'Non conforme'}</span> &nbsp; Grand texte : <span class="pill ${large?'ok':'bad'}">${large?'Conforme':'Non conforme'}</span>`;};
+ $('calc').click();
+})();
+</script>
+</body></html>
